@@ -1,0 +1,30 @@
+language: go
+go:
+- '1.12.1'
+env:
+  global:
+  - AWS_ACCESS_KEY_ID=YOUR_ACCESS_KEY_ID
+  - AWS_DEFAULT_REGION=us-east-1
+  - AWS_S3_BUCKET bucket = 'deployment-packages-mlabouardy'
+  - FUNCTION_NAME = 'Fibonacci'
+
+branches:
+  only:
+  - master
+
+before_install:
+- pip install --user awscli
+- export PATH=$PATH:$HOME/.local/bin
+
+jobs:
+  include:
+    - stage: test
+      script:
+        - go get -u github.com/golang/lint/golint
+        - go get -t ./...
+        - golint -set_exit_status
+        - go vet .
+        - go test .
+
+    - stage: deploy
+      script: "./test.sh"
