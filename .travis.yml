@@ -1,4 +1,18 @@
+
+notifications:
+  email: false
+  slack:
+    rooms:
+        - christopherjbischoff:pfGkxBzlRL76WzPenVJMjwzm#alerts
+    on_success: change # default: always
+    on_failure: always # default: always
+    template:
+      - "Repo `%{repository_slug}` *%{result}* build (<%{build_url}|#%{build_number}>) for commit (<%{compare_url}|%{commit}>) on branch `%{branch}`."
+      - "Execution time: *%{duration}*"
+      - "Message: %{message}"
+
 language: go
+
 go:
   - 1.12
 
@@ -6,29 +20,42 @@ branches:
   only:
   - master
 
+env:
+  global:
+  - AWS_DEFAULT_REGION=us-west-2
+  - AWS_S3_BUCKET=io.sliplab.lambdadeployment.uw2
+
 before_install:
   # execute all of the commands which need to be executed
   # before installing dependencies
   - pip install --user awscli
   - export PATH=$PATH:$HOME/.local/bin
-  - curl -L -s https://github.com/golang/dep/releases/download/v0.4.1/dep-linux-amd64 -o $GOPATH/bin/dep
+  - curl -L -s https://github.com/golang/dep/releases/download/v0.5.1/dep-linux-amd64 -o $GOPATH/bin/dep
   - chmod +x $GOPATH/bin/dep
 
 install:
   # install all of the dependencies you need here
   # - dep ensure
+  # go get -u github.com/golang/dep/cmd/dep
+  - $GOPATH/bin/dep ensure
   - go get golang.org/x/lint/golint
   - go get github.com/haya14busa/goverage
+  - go get github.com/mattn/goveralls
 
 before_script:
   # execute all of the commands which need to be executed
   # before running actual tests
   - PKGS=$(go list ./...)
   - LINT_PKGS=$(go list ./... | grep -Ev 'aws-lambda-go/lambda')
+  - go get -t -d -v ./...
 
 jobs:
   include:
+    - stage: format
+      script:
+        ./format.sh
     - stage: test
-      script: "./test.sh"
+      script:
+        ./test.sh
     - stage: build
-      script: "./build.sh"
+      script: ./build.sh
