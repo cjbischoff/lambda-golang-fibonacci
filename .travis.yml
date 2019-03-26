@@ -1,8 +1,6 @@
 language: go
 go:
   - 1.12
-  - 1.11
-  - tip
 
 branches:
   only:
@@ -18,7 +16,7 @@ before_install:
 
 install:
   # install all of the dependencies you need here
-  - dep ensure
+  # - dep ensure
   - go get golang.org/x/lint/golint
   - go get github.com/haya14busa/goverage
 
