@@ -24,6 +24,7 @@ env:
   global:
   - AWS_DEFAULT_REGION=us-west-2
   - AWS_S3_BUCKET=io.sliplab.lambdadeployment.uw2
+  - FUNCTION_NAME=${TRAVIS_REPO_SLUG#*/}
 
 before_install:
   # execute all of the commands which need to be executed
@@ -43,6 +44,7 @@ install:
   - go get github.com/haya14busa/goverage
   - go get github.com/mattn/goveralls
   - echo $TRAVIS_REPO_SLUG
+  - echo $FUNCTION_NAME
 
 before_script:
   # execute all of the commands which need to be executed
