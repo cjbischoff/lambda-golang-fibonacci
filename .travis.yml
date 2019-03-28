@@ -24,7 +24,6 @@ env:
   global:
   - AWS_DEFAULT_REGION=us-west-2
   - AWS_S3_BUCKET=io.sliplab.lambdadeployment.uw2
-  - FUNCTION_NAME=${TRAVIS_REPO_SLUG#*/}
 
 before_install:
   # execute all of the commands which need to be executed
@@ -43,8 +42,6 @@ install:
   - go get golang.org/x/lint/golint
   - go get github.com/haya14busa/goverage
   - go get github.com/mattn/goveralls
-  - echo $TRAVIS_REPO_SLUG
-  - echo $FUNCTION_NAME
 
 before_script:
   # execute all of the commands which need to be executed
@@ -56,10 +53,12 @@ before_script:
 jobs:
   include:
     - stage: format
-      script:
-        ./format.sh
+      script: ./format.sh
     - stage: test
-      script:
-        ./test.sh
+      script: ./test.sh
     - stage: build
       script: ./build.sh
+    - stage: push
+      script: ./push.sh
+    - stage: deploy
+      script: ./deploy.sh
