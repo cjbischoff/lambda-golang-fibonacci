@@ -61,7 +61,6 @@ jobs:
         - go vet .
         - go test .
         - go test ./... -race -coverprofile=coverage.txt -covermode=atomic
-        - $GOPATH/bin/goveralls -service=travis-ci
     - stage: build
       script: ./build.sh
     - stage: push
