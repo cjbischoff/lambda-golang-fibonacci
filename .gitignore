@@ -15,3 +15,6 @@ coverage.txt
 # Go Dep
 Gopkg.lock
 Gopkg.toml
+
+# Vendor Directory
+/vendor
