@@ -55,7 +55,13 @@ jobs:
     - stage: format
       script: ./format.sh
     - stage: test
-      script: ./test.sh
+      script:
+        - go get -t ./...
+        - golint -set_exit_status
+        - go vet .
+        - go test .
+        - go test ./... -race -coverprofile=coverage.txt -covermode=atomic
+        - $GOPATH/bin/goveralls -service=travis-ci
     - stage: build
       script: ./build.sh
     - stage: push
