@@ -35,8 +35,6 @@ before_install:
 
 install:
   # install all of the dependencies you need here
-  # - dep ensure
-  # go get -u github.com/golang/dep/cmd/dep
   - $GOPATH/bin/dep init
   - $GOPATH/bin/dep ensure
   - go get golang.org/x/lint/golint
@@ -62,8 +60,30 @@ jobs:
         - go test .
         - go test ./... -race -coverprofile=coverage.txt -covermode=atomic
     - stage: build
-      script: ./build.sh
+      script:
+        - export commitID=`git rev-parse HEAD`
+        - export TRAVIS_REPO_NAME=${TRAVIS_REPO_SLUG#*/}
+        - echo $TRAVIS_REPO_NAME
+        - GOOS=linux GOARCH=amd64 go build -o main lambda_golang_fibonacci.go
+        - zip ${commitID}.zip main
     - stage: push
-      script: ./push.sh
+      script:
+        - export commitID=`git rev-parse HEAD`
+        - export TRAVIS_REPO_OWNER=${TRAVIS_REPO_SLUG%/*}
+        - export FUNCTION_NAME=${TRAVIS_REPO_SLUG#*/}
+        - echo $commitID
+        - echo $TRAVIS_REPO_OWNER
+        - echo $FUNCTION_NAME
+        #aws s3 cp ${commitID()}.zip s3://${AWS_S3_BUCKET}
     - stage: deploy
-      script: ./deploy.sh
+      script:
+        - export commitID=`git rev-parse HEAD`
+        - export TRAVIS_REPO_OWNER=${TRAVIS_REPO_SLUG%/*}
+        - export FUNCTION_NAME=${TRAVIS_REPO_SLUG#*/}
+        - echo $commitID
+        - echo $TRAVIS_REPO_OWNER
+        - echo $FUNCTION_NAME
+        #aws lambda update-function-code --function-name ${TRAVIS_REPO_NAME} \
+        #        --s3-bucket ${AWS_S3_BUCKET} \
+        #        --s3-key ${commitID()}.zip \
+        #        --region ${AWS_DEFAULT_REGION}
