@@ -61,14 +61,11 @@ jobs:
         - go vet .
         - go test .
         - go test ./... -race -coverprofile=coverage.txt -covermode=atomic
-    - stage: build
+    - stage: push
       script:
         - export commitID=`git rev-parse HEAD`
         - GOOS=linux GOARCH=amd64 go build -o main lambda_golang_fibonacci.go
         - zip ${commitID}.zip main
-    - stage: push
-      script:
-        - export commitID=`git rev-parse HEAD`
         - aws s3 cp ${commitID}.zip s3://${AWS_S3_BUCKET}
     - stage: deploy
       script:
@@ -76,3 +73,7 @@ jobs:
         - export FUNCTION_NAME=${TRAVIS_REPO_SLUG#*/}
         - echo $FUNCTION_NAME
         - aws lambda update-function-code --function-name ${FUNCTION_NAME} --s3-bucket ${AWS_S3_BUCKET} --s3-key ${commitID}.zip --region ${AWS_DEFAULT_REGION}
+    - stage: publish
+      script:
+        - export FUNCTION_NAME=${TRAVIS_REPO_SLUG#*/}
+        - aws lambda publish-version --function-name ${FUNCTION_NAME} --region ${AWS_DEFAULT_REGION}
