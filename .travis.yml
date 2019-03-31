@@ -82,8 +82,10 @@ jobs:
       script:
         - export commitID=`git rev-parse HEAD`
         - export FUNCTION_NAME=${TRAVIS_REPO_SLUG#*/}
-        - aws lambda update-function-code --function-name ${FUNCTION_NAME} --s3-bucket ${AWS_S3_BUCKET} --s3-key ${commitID}.zip --region ${AWS_DEFAULT_REGION}
+        - echo $FUNCTION_NAME
+        - echo $commitID
+        - aws lambda update-function-code --function-name $FUNCTION_NAME --s3-bucket $AWS_S3_BUCKET --s3-key $commitID.zip --region $AWS_DEFAULT_REGION --no-publish
     - stage: publish
       script:
         - export FUNCTION_NAME=${TRAVIS_REPO_SLUG#*/}
-        - aws lambda publish-version --function-name ${FUNCTION_NAME} --region ${AWS_DEFAULT_REGION}
+        - aws lambda publish-version --function-name $FUNCTION_NAME --region $AWS_DEFAULT_REGION
