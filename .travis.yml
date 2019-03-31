@@ -71,7 +71,7 @@ jobs:
         - npm install -g snyk
         - which snyk
         - snyk auth $snyk_token
-        - synk test
+        - snyk test
     - stage: push
       script:
         - export commitID=`git rev-parse HEAD`
