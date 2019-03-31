@@ -24,6 +24,8 @@ env:
   global:
   - AWS_DEFAULT_REGION=us-west-2
   - AWS_S3_BUCKET=io.sliplab.lambdadeployment.uw2
+  - access_key_id: "$AWS_ACCESS_KEY_ID"
+  - secret_access_key: "$AWS_SECRET_ACCESS_KEY"
 
 before_install:
   # execute all of the commands which need to be executed
@@ -62,28 +64,15 @@ jobs:
     - stage: build
       script:
         - export commitID=`git rev-parse HEAD`
-        - export TRAVIS_REPO_NAME=${TRAVIS_REPO_SLUG#*/}
-        - echo $TRAVIS_REPO_NAME
         - GOOS=linux GOARCH=amd64 go build -o main lambda_golang_fibonacci.go
         - zip ${commitID}.zip main
     - stage: push
       script:
         - export commitID=`git rev-parse HEAD`
-        - export TRAVIS_REPO_OWNER=${TRAVIS_REPO_SLUG%/*}
-        - export FUNCTION_NAME=${TRAVIS_REPO_SLUG#*/}
-        - echo $commitID
-        - echo $TRAVIS_REPO_OWNER
-        - echo $FUNCTION_NAME
-        #aws s3 cp ${commitID()}.zip s3://${AWS_S3_BUCKET}
+        - aws s3 cp ${commitID}.zip s3://${AWS_S3_BUCKET}
     - stage: deploy
       script:
         - export commitID=`git rev-parse HEAD`
-        - export TRAVIS_REPO_OWNER=${TRAVIS_REPO_SLUG%/*}
         - export FUNCTION_NAME=${TRAVIS_REPO_SLUG#*/}
-        - echo $commitID
-        - echo $TRAVIS_REPO_OWNER
         - echo $FUNCTION_NAME
-        #aws lambda update-function-code --function-name ${TRAVIS_REPO_NAME} \
-        #        --s3-bucket ${AWS_S3_BUCKET} \
-        #        --s3-key ${commitID()}.zip \
-        #        --region ${AWS_DEFAULT_REGION}
+        - aws lambda update-function-code --function-name ${FUNCTION_NAME} --s3-bucket ${AWS_S3_BUCKET} --s3-key ${commitID}.zip --region ${AWS_DEFAULT_REGION}
