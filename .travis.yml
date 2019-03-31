@@ -3,7 +3,7 @@ notifications:
   email: false
   slack:
     rooms:
-        - christopherjbischoff:pfGkxBzlRL76WzPenVJMjwzm#alerts
+        - secure: "feqSVQ4KuF1zdEO3ZlVcolbbX/KJQ8e8YqOHr1k/noYMtxUvnorcpfxPUJIKJOws+CTOePL00BrXjr2rQjOrdY3fiJPqv/UwaQjyJYkBaP6vHZK7/bjnzJl3aVkZLEacy3DC2oh/d4LAVoFrStYBrfRIb7K6SlIcwtBsMzmn/j1rHcgLKl8H1fP5ceKsLc2fEd+ANfdAsz+7DmO0edCV5nhEbC1sDU+3RQ0eXkzY9UmSMIDPIjy/ViN3q30Qs82le//ypqQSMS7GxIrXEdOTmQt02GScsTD5ppbxPomv22CR88tDcaB6iLVXTfMpkNWLNiMzYyopUypbZv9dXaiz4BltfOHnohjJVGeeaEoOXlQKmperOuv77FGidOIX/RvBMVWWBgpUVxZompDPwOOo4RnSpkYgZzq+DJsAqI3YuhSqfUImcXXkS61cN5v/lyQF3YuOk3ns2S7FBKYK3rUpSOdGwRCIBX6VNkU4GdSLs20dXsMRg9//y3M7zGUuuiu6zHpARTUcqlh8dhuf9Bm4MXBs7M2FcEDksZg11HfDMOTC+1qQrJ6xnipSUrJLkaCy/GixE1q1dylAn+XrD+4Dm/iJgVK8wkugsW0so/c0dMnlqFI6Ke8fd2Yj0xZnI9pZ/lcFWJBBg2ZwGKku58vyx8Gh54iu+RF5UoG/f8D34vQ="
     on_success: change # default: always
     on_failure: always # default: always
     template:
