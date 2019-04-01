@@ -24,6 +24,9 @@ env:
   global:
   - AWS_DEFAULT_REGION=us-west-2
   - AWS_S3_BUCKET=io.sliplab.lambdadeployment.uw2
+  - LAMBDA_RUNTIME=go1.x
+  - LAMBDA_ARN:=arn:aws:iam::191779904557:role/tf-lambda_basic_execution-role
+  - LAMBDA_HANDLER=main
   - access_key_id: "$AWS_ACCESS_KEY_ID"
   - secret_access_key: "$AWS_SECRET_ACCESS_KEY"
   - snyk_token: "$SNYK_TOKEN"
@@ -84,7 +87,11 @@ jobs:
         - export FUNCTION_NAME=${TRAVIS_REPO_SLUG#*/}
         - echo $FUNCTION_NAME
         - echo $commitID
-        - aws lambda update-function-code --function-name $FUNCTION_NAME --s3-bucket $AWS_S3_BUCKET --s3-key $commitID.zip --region $AWS_DEFAULT_REGION --no-publish
+        - aws lambda update-function-code --function-name $FUNCTION_NAME --s3-bucket $AWS_S3_BUCKET --s3-key $commitID.zip --region $AWS_DEFAULT_REGION --no-publish || aws lambda create-function --function-name $FUNCTION_NAME --runtime $LAMBDA_RUNTIME --role $LAMBDA_ARN --handler $LAMBDA_HANDLER --code S3Bucket=$AWS_S3_BUCKET,S3Key=$commitID.zip --memory-size 1024 --no-publish
+
+  environment:
+    name: master
+
     - stage: publish
       script:
         - export FUNCTION_NAME=${TRAVIS_REPO_SLUG#*/}
