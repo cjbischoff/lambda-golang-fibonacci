@@ -86,11 +86,8 @@ jobs:
         - export commitID=`git rev-parse HEAD`
         - export FUNCTION_NAME=${TRAVIS_REPO_SLUG#*/}
         - aws lambda update-function-code --function-name $FUNCTION_NAME --s3-bucket $AWS_S3_BUCKET --s3-key $commitID.zip --region $AWS_DEFAULT_REGION --no-publish || aws lambda create-function --function-name $FUNCTION_NAME --runtime $LAMBDA_RUNTIME --role $LAMBDA_ARN --handler $LAMBDA_HANDLER --code S3Bucket=$AWS_S3_BUCKET,S3Key=$commitID.zip --memory-size 1024 --no-publish
-
-  environment:
-    name: master
-
     - stage: publish
+      if: branch = master
       script:
         - export FUNCTION_NAME=${TRAVIS_REPO_SLUG#*/}
         - aws lambda publish-version --function-name $FUNCTION_NAME --region $AWS_DEFAULT_REGION
