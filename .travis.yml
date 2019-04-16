@@ -84,27 +84,25 @@ jobs:
         - zip ${commitID}.zip main
         - aws s3 cp ${commitID}.zip s3://${AWS_S3_BUCKET}
     - stage: install
+      condition: "$TRAVIS_TAG =~ -install$"
       script:
         - echo $TRAVIS_TAG
         - export commitID=`git rev-parse HEAD`
         - export FUNCTION_NAME=${TRAVIS_REPO_SLUG#*/}
-        - if [[ "$TRAVIS_TAG =~ -install$" ]] ; then
-            aws lambda create-function --region $AWS_DEFAULT_REGION --function-name $FUNCTION_NAME --runtime $LAMBDA_RUNTIME --role $LAMBDA_ARN --handler $LAMBDA_HANDLER --code S3Bucket=$AWS_S3_BUCKET,S3Key=$commitID.zip --memory-size 1024 --no-publish
-          fi
+        - echo $FUNCTION_NAME
+        - aws lambda create-function --region $AWS_DEFAULT_REGION --function-name $FUNCTION_NAME --runtime $LAMBDA_RUNTIME --role $LAMBDA_ARN --handler $LAMBDA_HANDLER --code S3Bucket=$AWS_S3_BUCKET,S3Key=$commitID.zip --memory-size 1024 --no-publish
     - stage: update
-      # if: ($TRAVIS_TAG =~ -update$)
+      condition: "$TRAVIS_TAG =~ -update$"
       script:
-        - if [[ "$TRAVIS_TAG =~ -update$" ]] ; then
-            echo $TRAVIS_TAG
-            export commitID=`git rev-parse HEAD`
-            export FUNCTION_NAME=${TRAVIS_REPO_SLUG#*/}
-            aws lambda update-function-code --function-name $FUNCTION_NAME --s3-bucket $AWS_S3_BUCKET --s3-key $commitID.zip --region $AWS_DEFAULT_REGION --no-publish
-          fi
+        - echo $TRAVIS_TAG
+        - export commitID=`git rev-parse HEAD`
+        - export FUNCTION_NAME=${TRAVIS_REPO_SLUG#*/}
+        - echo $FUNCTION_NAME
+        - aws lambda update-function-code --function-name $FUNCTION_NAME --s3-bucket $AWS_S3_BUCKET --s3-key $commitID.zip --region $AWS_DEFAULT_REGION --no-publish
     - stage: publish
-      # if: ($TRAVIS_TAG =~ -update$)
+      condition: "$TRAVIS_TAG =~ -publish$"
       script:
-        - if [[ "$TRAVIS_TAG =~ -publish$" ]] ; then
-            echo $TRAVIS_TAG
-            export FUNCTION_NAME=${TRAVIS_REPO_SLUG#*/}
-            aws lambda publish-version --function-name $FUNCTION_NAME --region $AWS_DEFAULT_REGION
-          fi
+        - echo $TRAVIS_TAG
+        - export FUNCTION_NAME=${TRAVIS_REPO_SLUG#*/}
+        - echo $FUNCTION_NAME
+        - aws lambda publish-version --function-name $FUNCTION_NAME --region $AWS_DEFAULT_REGION
