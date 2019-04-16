@@ -86,7 +86,8 @@ jobs:
     - stage: install
       condition: "$TRAVIS_TAG =~ -install$"
       script:
-        - echo $TRAVIS_TAG
+        - export TAG=${TRAVIS_TAG}
+        - echo $TAG
         - export commitID=`git rev-parse HEAD`
         - export FUNCTION_NAME=${TRAVIS_REPO_SLUG#*/}
         - echo $FUNCTION_NAME
@@ -94,7 +95,8 @@ jobs:
     - stage: update
       condition: "$TRAVIS_TAG =~ -update$"
       script:
-        - echo $TRAVIS_TAG
+        - export TAG=${TRAVIS_TAG}
+        - echo $TAG
         - export commitID=`git rev-parse HEAD`
         - export FUNCTION_NAME=${TRAVIS_REPO_SLUG#*/}
         - echo $FUNCTION_NAME
@@ -102,7 +104,8 @@ jobs:
     - stage: publish
       condition: "$TRAVIS_TAG =~ -publish$"
       script:
-        - echo $TRAVIS_TAG
+        - export TAG=${TRAVIS_TAG}
+        - echo $TAG
         - export FUNCTION_NAME=${TRAVIS_REPO_SLUG#*/}
         - echo $FUNCTION_NAME
         - aws lambda publish-version --function-name $FUNCTION_NAME --region $AWS_DEFAULT_REGION
