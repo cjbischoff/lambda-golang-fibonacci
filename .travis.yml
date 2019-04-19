@@ -55,12 +55,27 @@ before_script:
   - PKGS=$(go list ./...)
   - LINT_PKGS=$(go list ./... | grep -Ev 'aws-lambda-go/lambda')
   - go get -t -d -v ./...
-  - echo $TRAVIS_TAG
-  - export TRAVIS_TAG=${git describe --tags $(git rev-list --tags --max-count=1)}
-  - echo $TRAVIS_TAG
+  # - echo $TRAVIS_TAG
+  # - export TRAVIS_TAG=${git describe --tags $(git rev-list --tags --max-count=1)}
+  # - echo $TRAVIS_TAG
 
 after_success:
     - snyk monitor
+
+# the following line is needed to enable the TravisCI build conditions
+conditions: v1
+
+stages:
+  - name: install
+    if: type != cron AND branch != integration AND tag =~ -install$
+  - name: update
+    if: type = cron OR branch = integration OR commit_message =~ run_tests
+  - name: Deploy
+    if: type != cron AND branch != integration
+  - name: snyk
+    if: branch = master AND type = push
+  - name: publish
+    if: branch = master AND type = push
 
 jobs:
   include:
@@ -91,8 +106,8 @@ jobs:
       on:
         condition: "$TRAVIS_TAG =~ -install$"
       script:
-        - export TAG=${TRAVIS_TAG}
-        - echo $TAG
+        #- export TAG=${TRAVIS_TAG}
+        #- echo $TAG
         - export commitID=`git rev-parse HEAD`
         - export FUNCTION_NAME=${TRAVIS_REPO_SLUG#*/}
         - echo $FUNCTION_NAME
@@ -101,8 +116,8 @@ jobs:
       on:
         condition:"$TRAVIS_TAG =~ -update$"
       script:
-        - export TAG=${TRAVIS_TAG}
-        - echo $TAG
+          #- export TAG=${TRAVIS_TAG}
+          #- echo $TAG
         - export commitID=`git rev-parse HEAD`
         - export FUNCTION_NAME=${TRAVIS_REPO_SLUG#*/}
         - echo $FUNCTION_NAME
@@ -111,8 +126,8 @@ jobs:
       on:
         condition: "$TRAVIS_TAG =~ -publish$"
       script:
-        - export TAG=${TRAVIS_TAG}
-        - echo $TAG
+        #- export TAG=${TRAVIS_TAG}
+        #- echo $TAG
         - export FUNCTION_NAME=${TRAVIS_REPO_SLUG#*/}
         - echo $FUNCTION_NAME
         - aws lambda publish-version --function-name $FUNCTION_NAME --region $AWS_DEFAULT_REGION
