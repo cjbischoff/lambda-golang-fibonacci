@@ -55,9 +55,6 @@ before_script:
   - PKGS=$(go list ./...)
   - LINT_PKGS=$(go list ./... | grep -Ev 'aws-lambda-go/lambda')
   - go get -t -d -v ./...
-  # - echo $TRAVIS_TAG
-  # - export TRAVIS_TAG=${git describe --tags $(git rev-list --tags --max-count=1)}
-  # - echo $TRAVIS_TAG
 
 after_success:
     - snyk monitor
@@ -66,16 +63,18 @@ after_success:
 conditions: v1
 
 stages:
-  - name: install
-    if: type != cron AND branch != integration AND tag =~ -install$
-  - name: update
-    if: type = cron OR branch = integration OR commit_message =~ run_tests
-  - name: Deploy
-    if: type != cron AND branch != integration
+  - name: format
+    if: branch = master AND type = push
   - name: snyk
     if: branch = master AND type = push
+  - name: push
+    if: type != cron AND branch master
+  - name: install
+    if: type != cron AND branch master AND tag =~ -install$
+  - name: update
+    if: type != cron AND branch master AND tag =~ -update$
   - name: publish
-    if: branch = master AND type = push
+    if: type != cron AND branch master AND tag =~ -publish$
 
 jobs:
   include:
@@ -103,31 +102,19 @@ jobs:
         - zip ${commitID}.zip main
         - aws s3 cp ${commitID}.zip s3://${AWS_S3_BUCKET}
     - stage: install
-      on:
-        condition: "$TRAVIS_TAG =~ -install$"
       script:
-        #- export TAG=${TRAVIS_TAG}
-        #- echo $TAG
         - export commitID=`git rev-parse HEAD`
         - export FUNCTION_NAME=${TRAVIS_REPO_SLUG#*/}
         - echo $FUNCTION_NAME
         - aws lambda create-function --region $AWS_DEFAULT_REGION --function-name $FUNCTION_NAME --runtime $LAMBDA_RUNTIME --role $LAMBDA_ARN --handler $LAMBDA_HANDLER --code S3Bucket=$AWS_S3_BUCKET,S3Key=$commitID.zip --memory-size 1024 --no-publish
     - stage: update
-      on:
-        condition:"$TRAVIS_TAG =~ -update$"
       script:
-          #- export TAG=${TRAVIS_TAG}
-          #- echo $TAG
         - export commitID=`git rev-parse HEAD`
         - export FUNCTION_NAME=${TRAVIS_REPO_SLUG#*/}
         - echo $FUNCTION_NAME
         - aws lambda update-function-code --function-name $FUNCTION_NAME --s3-bucket $AWS_S3_BUCKET --s3-key $commitID.zip --region $AWS_DEFAULT_REGION --no-publish
     - stage: publish
-      on:
-        condition: "$TRAVIS_TAG =~ -publish$"
       script:
-        #- export TAG=${TRAVIS_TAG}
-        #- echo $TAG
         - export FUNCTION_NAME=${TRAVIS_REPO_SLUG#*/}
         - echo $FUNCTION_NAME
         - aws lambda publish-version --function-name $FUNCTION_NAME --region $AWS_DEFAULT_REGION
